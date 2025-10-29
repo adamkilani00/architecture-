@@ -142,7 +142,8 @@ E_tir_frequence:.word 20  # Fréquence des tirs ennemis
 
 # Gameplay
 M_vitesse:      .word 1   # Vitesse des missiles
-📊 Évaluation du projet
+```
+## 📊 Évaluation du projet
 Partie	Points	Description
 Pause	2 pts	Gestion temporelle précise
 Clavier	2 pts	Entrées synchrones via MMIO
@@ -151,7 +152,7 @@ Données	4 pts	Structures et gestion mémoire
 Mouvement	3 pts	Déplacement des entités
 Gameplay	2 pts	Mécaniques de jeu complètes
 Qualité	1 pt	Lisibilité et structure
-```
+
 
 
 ##  👥 Développement
