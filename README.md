@@ -151,23 +151,25 @@ Données	4 pts	Structures et gestion mémoire
 Mouvement	3 pts	Déplacement des entités
 Gameplay	2 pts	Mécaniques de jeu complètes
 Qualité	1 pt	Lisibilité et structure
+```
 
-👥 Développement
-Contexte : Projet académique – Licence 2 Informatique
 
-Matière : Architecture des Ordinateurs
+##  👥 Développement
+-Contexte : Projet académique – Licence 2 Informatique
 
-Environnement : RARS (RISC-V)
+-Matière : Architecture des Ordinateurs
 
-Langage : Assembleur RISC-V
+-Environnement : RARS (RISC-V)
 
-💡 Points techniques remarquables
-Optimisation mémoire via allocation dynamique
+-Langage : Assembleur RISC-V
 
-Gestion propre de la pile pour chaque fonction
+ ## 💡 Points techniques remarquables
+-Optimisation mémoire via allocation dynamique
 
-Algorithmes de collision efficaces
+-Gestion propre de la pile pour chaque fonction
 
-Code modulaire, clair et abondamment commenté
+-Algorithmes de collision efficaces
 
-Paramétrage flexible via variables globales
+-Code modulaire, clair et abondamment commenté
+
+-Paramétrage flexible via variables globales
