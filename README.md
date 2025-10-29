@@ -1,192 +1,173 @@
-Space Invaders - Projet RISC-V
-📋 Description du projet
-Ce projet consiste en l'implémentation d'un jeu Space Invaders en assembleur RISC-V, développé dans le cadre du cours d'Architecture des Ordinateurs en Licence 2 Informatique. Le jeu utilise l'émulateur RARS 1.6 pour l'exécution et met en œuvre des concepts avancés d'architecture des ordinateurs.
+# 🛸 Space Invaders – Projet RISC-V
 
-🎮 Fonctionnalités implémentées
-Partie 1 : Système de pause
-Affichage séquentiel des nombres de 1 à 10
+## 📋 Description du projet
+Ce projet consiste en l’implémentation complète du jeu **Space Invaders** en **assembleur RISC-V**, développé dans le cadre du cours **Architecture des Ordinateurs** en **Licence 2 Informatique**.  
+Le jeu s’exécute sur l’émulateur **RARS 1.6** et met en œuvre des concepts avancés d’architecture des ordinateurs tels que la gestion du clavier via MMIO, le double buffering graphique et la manipulation de structures mémoire complexes.
 
-Pauses temporelles précises de 500ms entre chaque affichage
+---
 
-Durée totale d'exécution : exactement 5 secondes
+## 🎮 Fonctionnalités implémentées
 
-Partie 2 : Gestion synchrone du clavier
-Détection en temps réel des touches pressées via MMIO
+### Partie 1 : Système de pause
+- Affichage séquentiel des nombres de **1 à 10**
+- Pauses précises de **500 ms** entre chaque affichage  
+- Durée totale d’exécution : **exactement 5 secondes**
 
-Contrôles :
+### Partie 2 : Gestion synchrone du clavier
+- Détection **en temps réel** des touches via **MMIO**
+- Contrôles :
+  - `i` → décrémente le compteur  
+  - `p` → incrémente le compteur  
+  - `o` → arrête le programme
+- Lecture **non bloquante** des entrées clavier
 
-i : décrémente le compteur
+### Partie 3 : Système graphique bitmap
+- **Double buffering** pour des animations fluides  
+- Gestion des couleurs **RGB 24-bit**  
+- Conversion **coordonnées ↔ adresse mémoire**
+- Primitives graphiques :
+  - Pixel
+  - Rectangle
+  - Effacement
+- Animation de rectangles avec mouvement fluide
 
-p : incrémente le compteur
+### Partie 4 : Moteur du jeu Space Invaders
+#### Entités :
+- Joueur (canon bleu)
+- Envahisseurs (rouges)
+- Obstacles (jaunes)
+- Missiles (blancs)
 
-o : arrête le programme
+#### Mécaniques :
+- Déplacement horizontal du joueur
+- Mouvement collectif et changement de direction des envahisseurs
+- Tirs (joueur et ennemis)
+- Détection complète des **collisions**
+- Gestion des **vies**, **victoire** et **défaite**
 
-Pas de blocage en attente d'entrée utilisateur
+---
 
-Partie 3 : Système graphique bitmap
-Double buffering pour des animations fluides
+## 🛠️ Architecture technique
 
-Gestion des couleurs RGB 24-bit
+### Structures de données
+- **Joueur** : position, dimensions, vies, couleur  
+- **Envahisseurs** : tableau dynamique avec état vivant/mort  
+- **Obstacles** : positions fixes prédéfinies  
+- **Missiles** : direction et état actif/inactif
 
-Système de coordonnées avec conversion adresse/position
+### Mémoire et affichage
+- **Bitmap Display** : 256 × 256 pixels  
+- Unités graphiques de **8×8 pixels** (optimisation)
+- Adresse mémoire : `0x10010000`  
+- **Double buffering** pour éviter le scintillement
 
-Primitives de dessin : pixels, rectangles, effacement
+### Contrôles
+| Touche | Action |
+|:-------:|:--------|
+| `i` | Déplacement à gauche |
+| `p` | Déplacement à droite |
+| `o` | Tir de missile |
 
-Animation de rectangles avec mouvement fluide
+---
 
-Partie 4 : Moteur de jeu Space Invaders
-Entités du jeu :
-
-Joueur contrôlable (canon bleu)
-
-Envahisseurs multiples (rouges)
-
-Obstacles défensifs (jaunes)
-
-Système de missiles (blancs)
-
-Mécaniques de jeu :
-
-Déplacement horizontal du joueur
-
-Mouvement collectif des envahisseurs avec changement de direction
-
-Système de tirs pour le joueur et les envahisseurs
-
-Détection de collisions complète
-
-Gestion des vies et conditions de victoire/défaite
-
-🛠️ Architecture technique
-Structure des données
-Joueur : position, dimensions, vies, couleur
-
-Envahisseurs : tableau dynamique avec état vivant/mort
-
-Obstacles : positions fixes prédéfinies
-
-Missiles : gestion dynamique avec direction et état actif/inactif
-
-Mémoire et affichage
-Bitmap Display configuré en 256×256 pixels
-
-Unités de 8×8 pixels pour optimisation des performances
-
-Adressage mémoire : 0x10010000 (zone d'affichage)
-
-Double buffering pour élimination du scintillement
-
-Contrôles
-Touche i : déplacement vers la gauche
-
-Touche p : déplacement vers la droite
-
-Touche o : tir de missile
-
-📁 Structure des fichiers
+## 📁 Structure du projet
 text
 projet-space-invaders/
-├── partie1.s          # Système de pause
-├── partie2.s          # Gestion synchrone du clavier
-├── partie3.s          # Système graphique bitmap
-├── partie4.s          # Jeu Space Invaders complet
-└── README.md          # Ce fichier
-🚀 Installation et exécution
-Prérequis
-RARS 1.6 (RISC-V Assembler and Runtime Simulator)
+├── partie1.s # Système de pause
+├── partie2.s # Gestion synchrone du clavier
+├── partie3.s # Système graphique bitmap
+├── partie4.s # Jeu Space Invaders complet
+└── README.md # Documentation du projet
 
-Connaissance de base de l'assembleur RISC-V
+yaml
+Copier le code
 
-Configuration RARS
-Ouvrir RARS 1.6
+---
 
-Aller dans Tools → Bitmap Display
+## 🚀 Installation et exécution
 
-Configurer :
+### Prérequis
+- **RARS 1.6** (RISC-V Assembler and Runtime Simulator)
+- Connaissances de base en **assembleur RISC-V**
 
-Unit Width/Height : 8 pixels
+### Configuration RARS
+1. Ouvrir **RARS 1.6**
+2. Aller dans **Tools → Bitmap Display**
+   - Unit Width/Height : `8`
+   - Display Width/Height : `256`
+   - Base Address : `0x10010000`
+   - Cliquer sur **Connect to Program**
+3. Aller dans **Tools → Keyboard and Display MMIO Simulator**
+   - Cliquer sur **Connect to Program**
 
-Display Width/Height : 256 pixels
+### Exécution
+1. Charger le fichier `.s` souhaité dans RARS  
+2. Assembler (`F3`)  
+3. Exécuter (`F5`) ou **pas-à-pas** (`F10`)
 
-Base Address : 0x10010000
+---
 
-Cliquer sur Connect to Program
+## 🎯 Règles du jeu
 
-Aller dans Tools → Keyboard and Display MMIO Simulator
+### Objectif
+Éliminer tous les envahisseurs sans perdre toutes ses vies et **empêcher** qu’ils atteignent le sol.
 
-Cliquer sur Connect to Program
+### Mécaniques
+- 3 vies initiales pour le joueur  
+- Les missiles du joueur détruisent les envahisseurs  
+- Les missiles ennemis réduisent les vies du joueur  
+- Les obstacles bloquent les tirs des deux côtés  
+- Les envahisseurs descendent progressivement à chaque bord atteint
 
-Exécution
-Charger le fichier souhaité dans RARS
+### Conditions de fin
+- ✅ **Victoire** : tous les envahisseurs sont éliminés  
+- ❌ **Défaite** :
+  - Plus de vies restantes  
+  - Les envahisseurs atteignent le sol  
 
-Assembler (F3)
+---
 
-Exécuter (F5) ou Exécuter pas-à-pas (F10)
+## 🔧 Personnalisation
 
-🎯 Règles du jeu
-Objectif
-Éliminer tous les envahisseurs sans perdre toutes ses vies
+Tu peux ajuster facilement les paramètres du jeu via les **variables globales** dans le code :
 
-Empêcher les envahisseurs d'atteindre le sol
-
-Mécaniques
-3 vies initiales pour le joueur
-
-Missiles joueur : détruisent les envahisseurs
-
-Missiles ennemis : réduisent les vies du joueur
-
-Obstacles : bloquent les missiles des deux camps
-
-Mouvement ennemi : déplacement latéral avec descente progressive
-
-Conditions de fin
-✅ Victoire : tous les envahisseurs éliminés
-
-❌ Défaite :
-
-Plus de vies restantes
-
-Envahisseurs atteignent le sol
-
-🔧 Personnalisation
-Le jeu offre une grande flexibilité via les variables globales :
-
-assembly
+```assembly
 # Dimensions et apparence
-J_largeur: .word 3       # Largeur du joueur
-J_vies: .word 3          # Nombre de vies initiales
+J_largeur:      .word 3   # Largeur du joueur
+J_vies:         .word 3   # Nombre de vies initiales
 
-# Envahisseurs  
-E_nombre: .word 12       # Nombre total d'envahisseurs
-E_tir_frequence: .word 20 # Fréquence des tirs ennemis
+# Envahisseurs
+E_nombre:       .word 12  # Nombre total d'envahisseurs
+E_tir_frequence:.word 20  # Fréquence des tirs ennemis
 
 # Gameplay
-M_vitesse: .word 1       # Vitesse des missiles
+M_vitesse:      .word 1   # Vitesse des missiles
 📊 Évaluation du projet
-Le projet est noté sur 20 points selon la répartition :
-
 Partie	Points	Description
 Pause	2 pts	Gestion temporelle précise
-Clavier	2 pts	Entrées synchrones MMIO
+Clavier	2 pts	Entrées synchrones via MMIO
 Images	6 pts	Système graphique bitmap
 Données	4 pts	Structures et gestion mémoire
 Mouvement	3 pts	Déplacement des entités
 Gameplay	2 pts	Mécaniques de jeu complètes
 Qualité	1 pt	Lisibilité et structure
+
 👥 Développement
-Contexte : Projet académique - Licence 2 Informatique
+Contexte : Projet académique – Licence 2 Informatique
+
 Matière : Architecture des Ordinateurs
-Environnement : RISC-V avec émulateur RARS
+
+Environnement : RARS (RISC-V)
+
 Langage : Assembleur RISC-V
 
 💡 Points techniques remarquables
-Optimisation mémoire avec allocation dynamique
+Optimisation mémoire via allocation dynamique
 
-Gestion propre de la pile pour tous les appels de fonction
+Gestion propre de la pile pour chaque fonction
 
 Algorithmes de collision efficaces
 
-Code modulaire et bien commenté
+Code modulaire, clair et abondamment commenté
 
-Configuration flexible via variables globales
+Paramétrage flexible via variables globales
