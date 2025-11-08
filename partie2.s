@@ -1,5 +1,5 @@
 .data
-    newline: .asciiz "\n"
+    newline: .asciz "\n"
 
 .text
     li t0, 0           # Initialise t0 à 0
