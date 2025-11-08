@@ -38,14 +38,14 @@ I_creer:
     sw t0, 8(sp)
     sw t1, 4(sp)
 
-    # Calculer I_largeur = LARGEUR_PIXELS / UNIT_WIDTH
-    la t0, LARGEUR_PIXELS
-    lw t0, 0(t0)
-    la t1, UNIT_WIDTH
-    lw t1, 0(t1)
-    div t0, t0, t1         # t0 = I_largeur (en Units)
-    la t1, I_largeur
-    sw t0, 0(t1)           # Sauvegarder I_largeur
+   # Calculer I_largeur = LARGEUR_PIXELS / UNIT_WIDTH
+    la t0, LARGEUR_PIXELS         # Charge l'adresse de LARGEUR_PIXELS
+    lw t0, 0(t0)                  # t0 = 256 (valeur)
+    la t1, UNIT_WIDTH             # Charge l'adresse de UNIT_WIDTH  
+    lw t1, 0(t1)                  # t1 = 8 (valeur)
+    div t0, t0, t1                # t0 = 256 / 8 = 32
+    la t1, I_largeur              # Charge l'adresse de I_largeur
+    sw t0, 0(t1)                  # Stocke 32 dans I_largeur
 
     # Calculer I_hauteur = HAUTEUR_PIXELS / UNIT_HEIGHT
     la t0, HAUTEUR_PIXELS
