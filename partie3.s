@@ -107,6 +107,40 @@ I_xy_to_addr:
     addi sp, sp, 12
     ret
 
+# Fonction : I_addr_to_xy   
+I_addr_to_xy:
+    addi sp, sp, -16
+    sw ra, 12(sp)
+    sw t0, 8(sp)
+    sw t1, 4(sp)
+    sw t2, 0(sp)
+
+    # Charger l'adresse de base I_buff
+    la t0, I_buff
+    lw t0, 0(t0)           # t0 = adresse de début du buffer
+
+    # Charger I_largeur
+    la t1, I_largeur
+    lw t1, 0(t1)           # t1 = largeur en Units
+
+    # Calculer l'offset depuis le début (en octets)
+    sub t2, a0, t0         # t2 = adresse - I_buff (offset en octets)
+
+    # Convertir l'offset en nombre de Units (÷4)
+    srli t2, t2, 2         # t2 = offset / 4 (maintenant en Units)
+
+    # Calculer y = offset / I_largeur
+    div a1, t2, t1         # a1 = y (ligne)
+
+    # Calculer x = offset % I_largeur  
+    rem a0, t2, t1         # a0 = x (colonne)
+
+    lw t2, 0(sp)
+    lw t1, 4(sp)
+    lw t0, 8(sp)
+    lw ra, 12(sp)
+    addi sp, sp, 16
+    ret
 # Fonction : I_plot
 I_plot:
     addi sp, sp, -20
