@@ -62,11 +62,11 @@ I_creer:
     la t1, I_hauteur
     lw t1, 0(t1)
     mul t0, t0, t1         # t0 = nombre total de Units
-    slli t0, t0, 2         # t0 = t0 * 4 (car chaque Unit = 4 octets)
+    slli t0, t0, 2         # t0 = t0 * 4 (2**2) (car chaque Unit = 4 octets), cela décale tous les bits de t0 de 2 vers la gauche
 
     # Allouer la mémoire avec sbrk
     mv a0, t0
-    li a7, 9               # Syscall 9 : sbrk (allocation mémoire)
+    li a7, 9               # 9 : sbrk (allocation mémoire)
     ecall
     # a0 contient maintenant l'adresse du buffer alloué
 
