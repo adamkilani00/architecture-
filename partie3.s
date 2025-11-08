@@ -278,6 +278,9 @@ rect_fin:
 
 # Fonction : I_buff_to_visu
 I_buff_to_visu:
+ # t0 = I_buff (ton brouillon)
+ # t1 = I_visu (l'écran visible)
+ # t2 = taille totale à copier (32×32×4 = 4096 octets)
     addi sp, sp, -16
     sw t0, 12(sp)
     sw t1, 8(sp)
@@ -297,10 +300,14 @@ I_buff_to_visu:
     lw t3, 0(t3)
     mul t2, t2, t3         # t2 = nombre de Units
     slli t2, t2, 2         # t2 = nombre d'octets
-
+    
+    # Boucle qui copie 4 octets par 4 octets
     # Boucle de copie
     li t3, 0               # t3 = compteur
 copie_boucle:
+# Lit 4 octets depuis I_buff
+# Écrit 4 octets dans I_visu  
+# Répète jusqu'à avoir tout copié
     bge t3, t2, copie_fin
 
     # Copier un mot (4 octets)
