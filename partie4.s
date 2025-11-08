@@ -12,8 +12,8 @@
     UNIT_WIDTH: .word 8            # Largeur d'une Unit en pixels
     UNIT_HEIGHT: .word 8           # Hauteur d'une Unit en pixels
     
-    I_largeur: .word 0             # CalculÈ : 32 Units
-    I_hauteur: .word 0             # CalculÈ : 32 Units
+    I_largeur: .word 0             # Calcul√© : 32 Units
+    I_hauteur: .word 0             # Calcul√© : 32 Units
     I_visu: .word 0x10010000       # Buffer visible
     I_buff: .word 0                # Buffer de travail
     
@@ -25,7 +25,7 @@
     COULEUR_BLANC: .word 0x00ffffff
     
     # ========================================
-    # PARTIE 4 : DonnÈes du jeu
+    # PARTIE 4 : Donn√©es du jeu
     # ========================================
     
     # --- JOUEUR ---
@@ -40,7 +40,7 @@
     # --- ENVAHISSEURS ---
     # Structure par envahisseur : [x, y, vivant] (3 entiers = 12 octets)
     E_nombre: .word 12         # Nombre d'envahisseurs
-    E_rangees: .word 2         # Nombre de rangÈes
+    E_rangees: .word 2         # Nombre de rang√©es
     E_largeur: .word 2
     E_hauteur: .word 2
     E_couleur: .word 0x00ff0000
@@ -49,7 +49,7 @@
     E_direction: .word 1       # 1 = droite, -1 = gauche
     E_x_depart: .word 2
     E_y_depart: .word 2
-    E_tableau: .word 0         # Adresse du tableau (allouÈ dynamiquement)
+    E_tableau: .word 0         # Adresse du tableau (allou√© dynamiquement)
     E_tir_compteur: .word 0    # Compteur pour les tirs
     E_tir_frequence: .word 20  # Tirer tous les 20 frames
     
@@ -59,7 +59,7 @@
     O_largeur: .word 3
     O_hauteur: .word 2
     O_couleur: .word 0x00ffff00
-    O_y: .word 23              # ¿ 1/5 de la hauteur (32/5 ? 6, donc y=26)
+    O_y: .word 23              # √Ä 1/5 de la hauteur (32/5 ? 6, donc y=26)
     O_espacement: .word 6
     O_tableau: .word 0         # Adresse du tableau
     
@@ -76,9 +76,9 @@
     RCR: .word 0xffff0000
     RDR: .word 0xffff0004
     
-    # --- …TAT DU JEU ---
-    JEU_en_cours: .word 1      # 1 = en cours, 0 = terminÈ
-    JEU_victoire: .word 0      # 1 = victoire, 0 = dÈfaite
+    # --- √âTAT DU JEU ---
+    JEU_en_cours: .word 1      # 1 = en cours, 0 = termin√©
+    JEU_victoire: .word 0      # 1 = victoire, 0 = d√©faite
     
     # Messages
     msg_victoire: .string "\n=== VICTOIRE ! ===\n"
@@ -92,7 +92,7 @@
 # MAIN : Boucle principale du jeu
 # ========================================
 main:
-    # Initialiser le systËme
+    # Initialiser le syst√®me
     jal I_creer
     jal J_creer
     jal E_creer
@@ -101,7 +101,7 @@ main:
     
     # Boucle de jeu
 boucle_jeu:
-    # VÈrifier si le jeu est terminÈ
+    # V√©rifier si le jeu est termin√©
     la t0, JEU_en_cours
     lw t0, 0(t0)
     beqz t0, fin_jeu
@@ -109,25 +109,25 @@ boucle_jeu:
     # Effacer le buffer
     jal I_effacer
     
-    # Afficher tous les ÈlÈments
+    # Afficher tous les √©l√©ments
     jal O_afficher
     jal E_afficher
     jal M_afficher
     jal J_afficher
     
-    # Copier vers l'Ècran
+    # Copier vers l'√©cran
     jal I_buff_to_visu
     
     # Lire le clavier
     jal J_deplacer
     
-    # DÈplacer les missiles
+    # D√©placer les missiles
     jal M_deplacer
     
-    # DÈplacer les envahisseurs
+    # D√©placer les envahisseurs
     jal E_deplacer
     
-    # VÈrifier les collisions
+    # V√©rifier les collisions
     jal verifier_collisions
     
     # Pause de 50ms (20 FPS)
@@ -235,7 +235,7 @@ I_plot:
     sw a2, 4(sp)
     sw t0, 0(sp)
     
-    # VÈrifier les limites
+    # V√©rifier les limites
     la t0, I_largeur
     lw t0, 0(t0)
     bge a0, t0, I_plot_fin
@@ -381,11 +381,11 @@ I_copie_fin:
     ret
 
 # ========================================
-# PARTIE 4 : CrÈation des objets
+# PARTIE 4 : Cr√©ation des objets
 # ========================================
 
 J_creer:
-    # Le joueur est dÈj‡ initialisÈ par les variables globales
+    # Le joueur est d√©j√† initialis√© par les variables globales
     ret
 
 E_creer:
@@ -417,7 +417,7 @@ E_creer:
     lw t2, 0(t2)
     la t3, E_largeur
     lw t3, 0(t3)
-    add t2, t2, t3
+    add t2, t2, t3 #distance entre le d√©but d'un envahisseur et le d√©but du suivant
     
     la t4, E_x_depart
     lw t4, 0(t4)
@@ -426,7 +426,7 @@ E_creer:
     la t6, E_rangees
     lw t6, 0(t6)
     
-    div a1, t0, t6      # Envahisseurs par rangÈe
+    div a1, t0, t6      # Envahisseurs par rang√©e
     
     li a2, 0            # Compteur
     li a3, 0            # x courant
@@ -437,16 +437,16 @@ E_init_loop:
     
     # Calculer position
     rem a5, a2, a1      # Colonne
-    div a6, a2, a1      # RangÈe
+    div a6, a2, a1      # Rang√©e
     
     mul a5, a5, t2
     add a5, a5, t4      # x = x_depart + col * espacement
     
     li t3, 3
     mul a6, a6, t3
-    add a6, a6, t5      # y = y_depart + rangÈe * 3
+    add a6, a6, t5      # y = y_depart + rang√©e * 3
     
-    # …crire dans le tableau
+    # √âcrire dans le tableau
     li t3, 12
     mul a7, a2, t3
     add a7, t1, a7
@@ -541,7 +541,7 @@ M_creer:
     la t0, M_tableau
     sw a0, 0(t0)
     
-    # Initialiser tous ‡ inactifs
+    # Initialiser tous √† inactifs
     la t0, M_max
     lw t0, 0(t0)
     la t1, M_tableau
@@ -828,7 +828,7 @@ M_tir_j_loop:
     lw a1, 12(a0)
     bnez a1, M_tir_j_next
     
-   # Missile trouvÈ
+   # Missile trouv√©
     la a1, J_x
     lw a1, 0(a1)
     la a2, J_largeur
@@ -882,14 +882,14 @@ M_dep_loop:
     lw t2, 12(t1)       # actif ?
     beqz t2, M_dep_next
     
-    # DÈplacer selon la direction
+    # D√©placer selon la direction
     lw t3, 8(t1)        # direction
     lw t4, 4(t1)        # y actuel
     
     mul t3, t3, s2
     sub t4, t4, t3      # y -= direction * vitesse
     
-    # VÈrifier les limites
+    # V√©rifier les limites
     bltz t4, M_dep_desactiver
     la t5, I_hauteur
     lw t5, 0(t5)
@@ -899,7 +899,7 @@ M_dep_loop:
     j M_dep_next
     
 M_dep_desactiver:
-    sw zero, 12(t1)     # DÈsactiver
+    sw zero, 12(t1)     # D√©sactiver
     
 M_dep_next:
     addi t0, t0, 1
@@ -921,7 +921,7 @@ E_deplacer:
     sw s2, 4(sp)
     sw s3, 0(sp)
     
-    # VÈrifier si on doit tirer
+    # V√©rifier si on doit tirer
     la t0, E_tir_compteur
     lw t1, 0(t0)
     addi t1, t1, 1
@@ -936,7 +936,7 @@ E_dep_pas_tir:
     la t0, E_tir_compteur
     sw t1, 0(t0)
     
-    # DÈplacer les envahisseurs
+    # D√©placer les envahisseurs
     la s0, E_nombre
     lw s0, 0(s0)
     la s1, E_tableau
@@ -944,7 +944,7 @@ E_dep_pas_tir:
     la s2, E_direction
     lw s2, 0(s2)
     
-    # VÈrifier si on touche un bord
+    # V√©rifier si on touche un bord
     li t6, 0            # Flag collision
     li t0, 0
 E_dep_check:
@@ -962,7 +962,7 @@ E_dep_check:
     lw t4, 0(t4)
     add t3, t3, t4
     
-    # Si direction = 1 (droite), vÈrifier bord droit
+    # Si direction = 1 (droite), v√©rifier bord droit
     li t4, 1
     bne s2, t4, E_dep_check_gauche
     
@@ -973,7 +973,7 @@ E_dep_check:
     j E_dep_check_next
     
 E_dep_check_gauche:
-    # Si direction = -1 (gauche), vÈrifier bord gauche
+    # Si direction = -1 (gauche), v√©rifier bord gauche
     lw t3, 0(t1)
     add t5, t3, s2
     bltz t5, E_dep_collision
@@ -1007,7 +1007,7 @@ E_dep_descendre:
     add t3, t3, t0
     sw t3, 4(t2)
     
-    # VÈrifier si atteint le sol
+    # V√©rifier si atteint le sol
     la t4, O_y
     lw t4, 0(t4)
     bge t3, t4, E_dep_game_over
@@ -1023,7 +1023,7 @@ E_dep_desc_fin:
     sw s2, 0(t0)
     
 E_dep_move:
-    # DÈplacer tous les envahisseurs
+    # D√©placer tous les envahisseurs
     li t0, 0
 E_dep_move_loop:
     bge t0, s0, E_dep_move_fin
@@ -1066,16 +1066,16 @@ M_tirer_envahisseur:
     sw t1, 4(sp)
     sw t2, 0(sp)
     
-    # Choisir un envahisseur vivant alÈatoirement
-    # Utiliser le temps comme gÈnÈrateur simple
+    # Choisir un envahisseur vivant al√©atoirement
+    # Utiliser le temps comme g√©n√©rateur simple
     li a7, 30
     ecall
     
     la t0, E_nombre
     lw t0, 0(t0)
-    remu t1, a0, t0     # Index alÈatoire
+    remu t1, a0, t0     # Index al√©atoire
     
-    # VÈrifier si vivant
+    # V√©rifier si vivant
     la t2, E_tableau
     lw t2, 0(t2)
     li t0, 12
@@ -1099,7 +1099,7 @@ M_tir_e_loop:
     lw a3, 12(a2)
     bnez a3, M_tir_e_next
     
-    # Missile trouvÈ
+    # Missile trouv√©
     lw a3, 0(t0)        # x envahisseur
     la a4, E_largeur
     lw a4, 0(a4)
@@ -1142,16 +1142,16 @@ verifier_collisions:
     sw ra, 4(sp)
     sw s0, 0(sp)
     
-    # VÈrifier missiles contre envahisseurs
+    # V√©rifier missiles contre envahisseurs
     jal collision_missile_envahisseurs
     
-    # VÈrifier missiles contre joueur
+    # V√©rifier missiles contre joueur
     jal collision_missile_joueur
     
-    # VÈrifier missiles contre obstacles
+    # V√©rifier missiles contre obstacles
     jal collision_missile_obstacles
     
-    # VÈrifier fin du jeu
+    # V√©rifier fin du jeu
     jal verifier_fin_jeu
     
     lw s0, 0(sp)
@@ -1204,7 +1204,7 @@ CME_loop_e:
     lw t2, 8(t1)        # vivant ?
     beqz t2, CME_next_e
     
-    # VÈrifier intersection
+    # V√©rifier intersection
     mv a0, t0           # Adresse missile
     mv a1, t1           # Adresse envahisseur
     
@@ -1218,9 +1218,9 @@ CME_loop_e:
     
     beqz a0, CME_next_e
     
-    # Collision dÈtectÈe
+    # Collision d√©tect√©e
     sw zero, 8(t1)      # Envahisseur mort
-    sw zero, 12(t0)     # Missile dÈsactivÈ
+    sw zero, 12(t0)     # Missile d√©sactiv√©
     j CME_next_m
     
 CME_next_e:
@@ -1268,7 +1268,7 @@ CMJ_loop:
     li t2, -1
     bne t1, t2, CMJ_next    # Seulement missiles ennemis
     
-    # CrÈer rectangle joueur temporaire
+    # Cr√©er rectangle joueur temporaire
     la t1, J_x
     lw t1, 0(t1)
     la t2, J_y
@@ -1401,7 +1401,7 @@ M_intersecteRectangle:
     lw s2, 0(a1)        # rx
     lw s3, 4(a1)        # ry
     
-    # DÈterminer largeur/hauteur du rectangle
+    # D√©terminer largeur/hauteur du rectangle
     lw t0, 4(a1)
     la t1, O_tableau
     lw t1, 0(t1)
@@ -1421,12 +1421,12 @@ MIR_envahisseur:
     lw t3, 0(t3)
     
 MIR_test:
-    # VÈrifier si mx est dans [rx, rx+largeur]
+    # V√©rifier si mx est dans [rx, rx+largeur]
     blt s0, s2, MIR_non
     add t4, s2, t2
     bge s0, t4, MIR_non
     
-    # VÈrifier si my est dans [ry, ry+hauteur]
+    # V√©rifier si my est dans [ry, ry+hauteur]
     la t4, M_longueur
     lw t4, 0(t4)
     add t5, s1, t4      # my + longueur
@@ -1435,7 +1435,7 @@ MIR_test:
     add t6, s3, t3
     bge s1, t6, MIR_non
     
-    # Intersection dÈtectÈe
+    # Intersection d√©tect√©e
     li a0, 1
     j MIR_fin
     
@@ -1455,12 +1455,12 @@ verifier_fin_jeu:
     sw t0, 4(sp)
     sw t1, 0(sp)
     
-    # VÈrifier si le joueur a perdu toutes ses vies
+    # V√©rifier si le joueur a perdu toutes ses vies
     la t0, J_vies
     lw t0, 0(t0)
     blez t0, fin_defaite
     
-    # VÈrifier si tous les envahisseurs sont morts
+    # V√©rifier si tous les envahisseurs sont morts
     la t0, E_nombre
     lw t0, 0(t0)
     la t1, E_tableau
