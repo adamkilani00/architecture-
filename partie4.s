@@ -436,15 +436,15 @@ E_init_loop:
     bge a2, t0, E_init_fin
     
     # Calculer position
-    rem a5, a2, a1      # Colonne
-    div a6, a2, a1      # Rangée
+    rem a5, a2, a1      # a5 contient la colonne de l'envahisseur dans sa rangée.
+    div a6, a2, a1      # a6 contient la rangée de l'envahisseur.
     
-    mul a5, a5, t2
-    add a5, a5, t4      # x = x_depart + col * espacement
+    mul a5, a5, t2      # On multiplie la colonne (a5) par cet espacement pour obtenir le décalage horizontal par rapport au premier envahisseur de la rangée
+    add a5, a5, t4      # On ajoute ce décalage de départ au décalage calculé précédemment pour obtenir la position x finale de l'envahisseur.
     
     li t3, 3
-    mul a6, a6, t3
-    add a6, a6, t5      # y = y_depart + rangée * 3
+    mul a6, a6, t3      # On multiplie la rangée (a6) par 3 pour obtenir le décalage vertical par rapport à la première rangée.
+    add a6, a6, t5      # On ajoute ce décalage de départ au décalage vertical calculé précédemment pour obtenir la position y finale de l'envahisseur.
     
     # Écrire dans le tableau
     li t3, 12
@@ -720,7 +720,7 @@ M_aff_loop:
     slli t1, t0, 4
     add t1, s1, t1
     
-    lw t2, 12(t1)       # actif ?
+    lw t2, 12(t1)       # actif ? Si le missile est inactif (0), on ne l’affiche pas.
     beqz t2, M_aff_next
     
     lw a0, 0(t1)        # x
