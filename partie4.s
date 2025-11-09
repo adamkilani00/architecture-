@@ -92,323 +92,70 @@
 # MAIN : Boucle principale du jeu
 # ========================================
 main:
-    # Initialiser le système
-    jal I_creer
+    jal I_creer       # Init image
     jal J_creer
     jal E_creer
     jal O_creer
     jal M_creer
-    
-    # Boucle de jeu
+
 boucle_jeu:
-    # Vérifier si le jeu est terminé
-    la t0, JEU_en_cours
-    lw t0, 0(t0)
-    beqz t0, fin_jeu
-    
-    # Effacer le buffer
     jal I_effacer
-    
-    # Afficher tous les éléments
     jal O_afficher
     jal E_afficher
     jal M_afficher
     jal J_afficher
-    
-    # Copier vers l'écran
     jal I_buff_to_visu
-    
-    # Lire le clavier
     jal J_deplacer
-    
-    # Déplacer les missiles
     jal M_deplacer
-    
-    # Déplacer les envahisseurs
     jal E_deplacer
-    
-    # Vérifier les collisions
     jal verifier_collisions
-    
-    # Pause de 50ms (20 FPS)
-    li a0, 50
+
+    li a0, 50          # Pause 50ms
     li a7, 32
     ecall
-    
-    j boucle_jeu
-    
-fin_jeu:
-    # Afficher le message final
+
+    la t0, JEU_en_cours
+    lw t0, 0(t0)
+    bnez t0, boucle_jeu
+
+    # Message fin de jeu
     la t0, JEU_victoire
     lw t0, 0(t0)
     bnez t0, afficher_victoire
-    
+
     la a0, msg_defaite
     li a7, 4
     ecall
     j quitter
-    
+
 afficher_victoire:
     la a0, msg_victoire
     li a7, 4
     ecall
-    
+
 quitter:
     li a7, 10
     ecall
 
 # ========================================
-# PARTIE 3 : Fonctions d'image
-# ========================================
-
-I_creer:
-    addi sp, sp, -16
-    sw ra, 12(sp)
-    sw t0, 8(sp)
-    sw t1, 4(sp)
-    
-    # Calculer I_largeur et I_hauteur
-    la t0, LARGEUR_PIXELS
-    lw t0, 0(t0)
-    la t1, UNIT_WIDTH
-    lw t1, 0(t1)
-    div t0, t0, t1
-    la t1, I_largeur
-    sw t0, 0(t1)
-    
-    la t0, HAUTEUR_PIXELS
-    lw t0, 0(t0)
-    la t1, UNIT_HEIGHT
-    lw t1, 0(t1)
-    div t0, t0, t1
-    la t1, I_hauteur
-    sw t0, 0(t1)
-    
-    # Allouer I_buff
-    la t0, I_largeur
-    lw t0, 0(t0)
-    la t1, I_hauteur
-    lw t1, 0(t1)
-    mul t0, t0, t1
-    slli t0, t0, 2
-    
-    mv a0, t0
-    li a7, 9
-    ecall
-    
-    la t0, I_buff
-    sw a0, 0(t0)
-    
-    lw t1, 4(sp)
-    lw t0, 8(sp)
-    lw ra, 12(sp)
-    addi sp, sp, 16
-    ret
-
-I_xy_to_addr:
-    addi sp, sp, -12
-    sw t0, 8(sp)
-    sw t1, 4(sp)
-    sw t2, 0(sp)
-    
-    la t0, I_largeur
-    lw t0, 0(t0)
-    mul t1, a1, t0
-    add t1, t1, a0
-    slli t1, t1, 2
-    
-    la t2, I_buff
-    lw t2, 0(t2)
-    add a0, t2, t1
-    
-    lw t2, 0(sp)
-    lw t1, 4(sp)
-    lw t0, 8(sp)
-    addi sp, sp, 12
-    ret
-
-I_plot:
-    addi sp, sp, -20
-    sw ra, 16(sp)
-    sw a0, 12(sp)
-    sw a1, 8(sp)
-    sw a2, 4(sp)
-    sw t0, 0(sp)
-    
-    # Vérifier les limites
-    la t0, I_largeur
-    lw t0, 0(t0)
-    bge a0, t0, I_plot_fin
-    bltz a0, I_plot_fin
-    
-    la t0, I_hauteur
-    lw t0, 0(t0)
-    bge a1, t0, I_plot_fin
-    bltz a1, I_plot_fin
-    
-    mv t0, a2
-    jal I_xy_to_addr
-    sw t0, 0(a0)
-    
-I_plot_fin:
-    lw t0, 0(sp)
-    lw a2, 4(sp)
-    lw a1, 8(sp)
-    lw a0, 12(sp)
-    lw ra, 16(sp)
-    addi sp, sp, 20
-    ret
-
-I_effacer:
-    addi sp, sp, -20
-    sw ra, 16(sp)
-    sw s0, 12(sp)
-    sw s1, 8(sp)
-    sw s2, 4(sp)
-    sw s3, 0(sp)
-    
-    la s0, I_largeur
-    lw s0, 0(s0)
-    la s1, I_hauteur
-    lw s1, 0(s1)
-    la s2, COULEUR_NOIR
-    lw s2, 0(s2)
-    
-    li s3, 0
-I_eff_y:
-    bge s3, s1, I_eff_fin
-    li t0, 0
-I_eff_x:
-    bge t0, s0, I_eff_ny
-    mv a0, t0
-    mv a1, s3
-    mv a2, s2
-    jal I_plot
-    addi t0, t0, 1
-    j I_eff_x
-I_eff_ny:
-    addi s3, s3, 1
-    j I_eff_y
-I_eff_fin:
-    lw s3, 0(sp)
-    lw s2, 4(sp)
-    lw s1, 8(sp)
-    lw s0, 12(sp)
-    lw ra, 16(sp)
-    addi sp, sp, 20
-    ret
-
-I_rectangle:
-    addi sp, sp, -32
-    sw ra, 28(sp)
-    sw s0, 24(sp)
-    sw s1, 20(sp)
-    sw s2, 16(sp)
-    sw s3, 12(sp)
-    sw s4, 8(sp)
-    sw s5, 4(sp)
-    sw s6, 0(sp)
-    
-    mv s0, a0
-    mv s1, a1
-    mv s2, a2
-    mv s3, a3
-    mv s4, a4
-    add s5, s0, s2
-    add s6, s1, s3
-    
-    mv t0, s1
-I_rect_y:
-    bge t0, s6, I_rect_fin
-    mv t1, s0
-I_rect_x:
-    bge t1, s5, I_rect_ny
-    mv a0, t1
-    mv a1, t0
-    mv a2, s4
-    jal I_plot
-    addi t1, t1, 1
-    j I_rect_x
-I_rect_ny:
-    addi t0, t0, 1
-    j I_rect_y
-I_rect_fin:
-    lw s6, 0(sp)
-    lw s5, 4(sp)
-    lw s4, 8(sp)
-    lw s3, 12(sp)
-    lw s2, 16(sp)
-    lw s1, 20(sp)
-    lw s0, 24(sp)
-    lw ra, 28(sp)
-    addi sp, sp, 32
-    ret
-
-I_buff_to_visu:
-    addi sp, sp, -16
-    sw t0, 12(sp)
-    sw t1, 8(sp)
-    sw t2, 4(sp)
-    sw t3, 0(sp)
-    
-    la t0, I_buff
-    lw t0, 0(t0)
-    la t1, I_visu
-    lw t1, 0(t1)
-    
-    la t2, I_largeur
-    lw t2, 0(t2)
-    la t3, I_hauteur
-    lw t3, 0(t3)
-    mul t2, t2, t3
-    slli t2, t2, 2
-    
-    li t3, 0
-I_copie:
-    bge t3, t2, I_copie_fin
-    add a0, t0, t3
-    add a1, t1, t3
-    lw a2, 0(a0)
-    sw a2, 0(a1)
-    addi t3, t3, 4
-    j I_copie
-I_copie_fin:
-    lw t3, 0(sp)
-    lw t2, 4(sp)
-    lw t1, 8(sp)
-    lw t0, 12(sp)
-    addi sp, sp, 16
-    ret
-
-# ========================================
-# PARTIE 4 : Création des objets
+# CREATION OBJETS (simplifiée)
 # ========================================
 
 J_creer:
-    # Le joueur est déjà initialisé par les variables globales
-    ret
+    ret   # Déjà initialisé par les variables globales
 
 E_creer:
-    addi sp, sp, -16
-    sw ra, 12(sp)
-    sw t0, 8(sp)
-    sw t1, 4(sp)
-    sw t2, 0(sp)
-    
-    # Allouer tableau : nombre * 3 * 4 octets
     la t0, E_nombre
     lw t0, 0(t0)
     li t1, 12
-    mul t0, t0, t1
-    
+    mul t0, t0, t1       # taille totale
     mv a0, t0
     li a7, 9
     ecall
-    
-    la t0, E_tableau
-    sw a0, 0(t0)
-    
-    # Initialiser les envahisseurs
+    la t1, E_tableau
+    sw a0, 0(t1)
+
+    # Initialisation positions
     la t0, E_nombre
     lw t0, 0(t0)
     la t1, E_tableau
@@ -417,76 +164,46 @@ E_creer:
     lw t2, 0(t2)
     la t3, E_largeur
     lw t3, 0(t3)
-    add t2, t2, t3 #distance entre le début d'un envahisseur et le début du suivant
-    
+    add t2, t2, t3          # espacement total
     la t4, E_x_depart
     lw t4, 0(t4)
     la t5, E_y_depart
     lw t5, 0(t5)
     la t6, E_rangees
     lw t6, 0(t6)
-    
-    div a1, t0, t6      # Envahisseurs par rangée
-    
-    li a2, 0            # Compteur
-    li a3, 0            # x courant
-    li a4, 0            # y courant
-    
-E_init_loop:
-    bge a2, t0, E_init_fin
-    
-    # Calculer position
-    rem a5, a2, a1      # a5 contient la colonne de l'envahisseur dans sa rangée.
-    div a6, a2, a1      # a6 contient la rangée de l'envahisseur.
-    
-    mul a5, a5, t2      # On multiplie la colonne (a5) par cet espacement pour obtenir le décalage horizontal par rapport au premier envahisseur de la rangée
-    add a5, a5, t4      # On ajoute ce décalage de départ au décalage calculé précédemment pour obtenir la position x finale de l'envahisseur.
-    
-    li t3, 3
-    mul a6, a6, t3      # On multiplie la rangée (a6) par 3 pour obtenir le décalage vertical par rapport à la première rangée.
-    add a6, a6, t5      # On ajoute ce décalage de départ au décalage vertical calculé précédemment pour obtenir la position y finale de l'envahisseur.
-    
-    # Écrire dans le tableau
-    li t3, 12
-    mul a7, a2, t3
-    add a7, t1, a7
-    
-    sw a5, 0(a7)        # x
-    sw a6, 4(a7)        # y
-    li t3, 1
-    sw t3, 8(a7)        # vivant = 1
-    
-    addi a2, a2, 1
-    j E_init_loop
-    
-E_init_fin:
-    lw t2, 0(sp)
-    lw t1, 4(sp)
-    lw t0, 8(sp)
-    lw ra, 12(sp)
-    addi sp, sp, 16
+    div t7, t0, t6           # envahisseurs par rangée
+
+    li t8, 0
+E_loop:
+    bge t8, t0, E_fin
+    rem t9, t8, t7           # colonne
+    div s0, t8, t7           # rangée
+    mul t9, t9, t2
+    add t9, t9, t4
+    li s1, 3
+    mul s0, s0, s1
+    add s0, s0, t5
+    slli s2, t8, 2
+    add s2, s2, t1
+    sw t9, 0(s2)
+    sw s0, 4(s2)
+    li s3, 1
+    sw s3, 8(s2)
+    addi t8, t8, 1
+    j E_loop
+E_fin:
     ret
 
 O_creer:
-    addi sp, sp, -16
-    sw ra, 12(sp)
-    sw t0, 8(sp)
-    sw t1, 4(sp)
-    sw t2, 0(sp)
-    
-    # Allouer tableau : nombre * 2 * 4 octets
     la t0, O_nombre
     lw t0, 0(t0)
     slli t0, t0, 3
-    
     mv a0, t0
     li a7, 9
     ecall
-    
-    la t0, O_tableau
-    sw a0, 0(t0)
-    
-    # Initialiser les obstacles
+    la t1, O_tableau
+    sw a0, 0(t1)
+
     la t0, O_nombre
     lw t0, 0(t0)
     la t1, O_tableau
@@ -496,260 +213,155 @@ O_creer:
     la t3, O_largeur
     lw t3, 0(t3)
     add t2, t2, t3
-    
     la t4, O_y
     lw t4, 0(t4)
-    
     li t5, 0
-O_init_loop:
-    bge t5, t0, O_init_fin
-    
-    # x = 2 + i * espacement
+O_loop:
+    bge t5, t0, O_fin
     mul t6, t5, t2
     addi t6, t6, 2
-    
-    slli a0, t5, 3
-    add a0, t1, a0
-    sw t6, 0(a0)        # x
-    sw t4, 4(a0)        # y
-    
+    slli s0, t5, 3
+    add s0, t1, s0
+    sw t6, 0(s0)
+    sw t4, 4(s0)
     addi t5, t5, 1
-    j O_init_loop
-    
-O_init_fin:
-    lw t2, 0(sp)
-    lw t1, 4(sp)
-    lw t0, 8(sp)
-    lw ra, 12(sp)
-    addi sp, sp, 16
+    j O_loop
+O_fin:
     ret
 
 M_creer:
-    addi sp, sp, -8
-    sw ra, 4(sp)
-    sw t0, 0(sp)
-    
-    # Allouer tableau : max * 4 * 4 octets
     la t0, M_max
     lw t0, 0(t0)
     slli t0, t0, 4
-    
     mv a0, t0
     li a7, 9
     ecall
-    
-    la t0, M_tableau
-    sw a0, 0(t0)
-    
-    # Initialiser tous à inactifs
+    la t1, M_tableau
+    sw a0, 0(t1)
+
     la t0, M_max
     lw t0, 0(t0)
     la t1, M_tableau
     lw t1, 0(t1)
-    
     li t2, 0
-M_init_loop:
-    bge t2, t0, M_init_fin
+M_loop:
+    bge t2, t0, M_fin
     slli t3, t2, 4
     add t3, t1, t3
-    sw zero, 12(t3)     # actif = 0
+    sw zero, 12(t3)   # inactif
     addi t2, t2, 1
-    j M_init_loop
-    
-M_init_fin:
-    lw t0, 0(sp)
-    lw ra, 4(sp)
-    addi sp, sp, 8
+    j M_loop
+M_fin:
     ret
 
 # ========================================
-# Fonctions d'affichage
+# AFFICHAGE (simplifié)
 # ========================================
 
 J_afficher:
-    addi sp, sp, -8
-    sw ra, 4(sp)
-    
-    la t0, J_x
-    lw a0, 0(t0)
-    la t0, J_y
-    lw a1, 0(t0)
-    la t0, J_largeur
-    lw a2, 0(t0)
-    la t0, J_hauteur
-    lw a3, 0(t0)
-    la t0, J_couleur
-    lw a4, 0(t0)
-    
+    la a0, J_x
+    lw a0, 0(a0)
+    la a1, J_y
+    lw a1, 0(a1)
+    la a2, J_largeur
+    lw a2, 0(a2)
+    la a3, J_hauteur
+    lw a3, 0(a3)
+    la a4, J_couleur
+    lw a4, 0(a4)
     jal I_rectangle
-    
-    lw ra, 4(sp)
-    addi sp, sp, 8
     ret
 
 E_afficher:
-    addi sp, sp, -24
-    sw ra, 20(sp)
-    sw s0, 16(sp)
-    sw s1, 12(sp)
-    sw s2, 8(sp)
-    sw s3, 4(sp)
-    sw s4, 0(sp)
-    
-    la s0, E_nombre
-    lw s0, 0(s0)
-    la s1, E_tableau
-    lw s1, 0(s1)
-    la s2, E_largeur
-    lw s2, 0(s2)
-    la s3, E_hauteur
-    lw s3, 0(s3)
-    la s4, E_couleur
-    lw s4, 0(s4)
-    
-    li t0, 0
-E_aff_loop:
-    bge t0, s0, E_aff_fin
-    
-    li t1, 12
-    mul t1, t0, t1
-    add t1, s1, t1
-    
-    lw t2, 8(t1)        # vivant ?
-    beqz t2, E_aff_next
-    
-    lw a0, 0(t1)        # x
-    lw a1, 4(t1)        # y
-    mv a2, s2
-    mv a3, s3
-    mv a4, s4
-    
-    addi sp, sp, -4
-    sw t0, 0(sp)
+    la t0, E_tableau
+    lw t0, 0(t0)
+    la t1, E_nombre
+    lw t1, 0(t1)
+    la t2, E_largeur
+    lw t2, 0(t2)
+    la t3, E_hauteur
+    lw t3, 0(t3)
+    la t4, E_couleur
+    lw t4, 0(t4)
+
+    li t5, 0
+E_loop_aff:
+    bge t5, t1, E_fin_aff
+    slli t6, t5, 2
+    add t6, t0, t6*3
+    lw t7, 8(t6)
+    beqz t7, E_skip
+    lw a0, 0(t6)
+    lw a1, 4(t6)
+    mv a2, t2
+    mv a3, t3
+    mv a4, t4
     jal I_rectangle
-    lw t0, 0(sp)
-    addi sp, sp, 4
-    
-E_aff_next:
-    addi t0, t0, 1
-    j E_aff_loop
-    
-E_aff_fin:
-    lw s4, 0(sp)
-    lw s3, 4(sp)
-    lw s2, 8(sp)
-    lw s1, 12(sp)
-    lw s0, 16(sp)
-    lw ra, 20(sp)
-    addi sp, sp, 24
+E_skip:
+    addi t5, t5, 1
+    j E_loop_aff
+E_fin_aff:
     ret
 
 O_afficher:
-    addi sp, sp, -24
-    sw ra, 20(sp)
-    sw s0, 16(sp)
-    sw s1, 12(sp)
-    sw s2, 8(sp)
-    sw s3, 4(sp)
-    sw s4, 0(sp)
-    
-    la s0, O_nombre
-    lw s0, 0(s0)
-    la s1, O_tableau
-    lw s1, 0(s1)
-    la s2, O_largeur
-    lw s2, 0(s2)
-    la s3, O_hauteur
-    lw s3, 0(s3)
-    la s4, O_couleur
-    lw s4, 0(s4)
-    
-    li t0, 0
-O_aff_loop:
-    bge t0, s0, O_aff_fin
-    
-    slli t1, t0, 3
-    add t1, s1, t1
-    
-    lw a0, 0(t1)
-    lw a1, 4(t1)
-    mv a2, s2
-    mv a3, s3
-    mv a4, s4
-    
-    addi sp, sp, -4
-    sw t0, 0(sp)
+    la t0, O_tableau
+    lw t0, 0(t0)
+    la t1, O_nombre
+    lw t1, 0(t1)
+    la t2, O_largeur
+    lw t2, 0(t2)
+    la t3, O_hauteur
+    lw t3, 0(t3)
+    la t4, O_couleur
+    lw t4, 0(t4)
+
+    li t5, 0
+O_loop_aff:
+    bge t5, t1, O_fin_aff
+    slli t6, t5, 3
+    add t6, t0, t6
+    lw a0, 0(t6)
+    lw a1, 4(t6)
+    mv a2, t2
+    mv a3, t3
+    mv a4, t4
     jal I_rectangle
-    lw t0, 0(sp)
-    addi sp, sp, 4
-    
-    addi t0, t0, 1
-    j O_aff_loop
-    
-O_aff_fin:
-    lw s4, 0(sp)
-    lw s3, 4(sp)
-    lw s2, 8(sp)
-    lw s1, 12(sp)
-    lw s0, 16(sp)
-    lw ra, 20(sp)
-    addi sp, sp, 24
+    addi t5, t5, 1
+    j O_loop_aff
+O_fin_aff:
     ret
 
 M_afficher:
-    addi sp, sp, -20
-    sw ra, 16(sp)
-    sw s0, 12(sp)
-    sw s1, 8(sp)
-    sw s2, 4(sp)
-    sw s3, 0(sp)
-    
-    la s0, M_max
-    lw s0, 0(s0)
-    la s1, M_tableau
-    lw s1, 0(s1)
-    la s2, M_longueur
-    lw s2, 0(s2)
-    la s3, M_couleur
-    lw s3, 0(s3)
-    
-    li t0, 0
-M_aff_loop:
-    bge t0, s0, M_aff_fin
-    
-    slli t1, t0, 4
-    add t1, s1, t1
-    
-    lw t2, 12(t1)       # actif ? Si le missile est inactif (0), on ne l’affiche pas.
-    beqz t2, M_aff_next
-    
-    lw a0, 0(t1)        # x
-    lw a1, 4(t1)        # y
-    li a2, 1            # largeur = 1
-    mv a3, s2           # hauteur = longueur
-    mv a4, s3           # couleur
-    
-    addi sp, sp, -4
-    sw t0, 0(sp)
+    la t0, M_tableau
+    lw t0, 0(t0)
+    la t1, M_max
+    lw t1, 0(t1)
+    la t2, M_longueur
+    lw t2, 0(t2)
+    la t3, M_couleur
+    lw t3, 0(t3)
+
+    li t4, 0
+M_loop_aff:
+    bge t4, t1, M_fin_aff
+    slli t5, t4, 4
+    add t5, t0, t5
+    lw t6, 12(t5)
+    beqz t6, M_skip
+    lw a0, 0(t5)
+    lw a1, 4(t5)
+    li a2, 1
+    mv a3, t2
+    mv a4, t3
     jal I_rectangle
-    lw t0, 0(sp)
-    addi sp, sp, 4
-    
-M_aff_next:
-    addi t0, t0, 1
-    j M_aff_loop
-    
-M_aff_fin:
-    lw s3, 0(sp)
-    lw s2, 4(sp)
-    lw s1, 8(sp)
-    lw s0, 12(sp)
-    lw ra, 16(sp)
-    addi sp, sp, 20
+M_skip:
+    addi t4, t4, 1
+    j M_loop_aff
+M_fin_aff:
     ret
 
 # ========================================
-# PARTIE 5 : Mouvement
+# PARTIE 5 : Mouvement simplifié
 # ========================================
 
 J_deplacer:
@@ -758,49 +370,52 @@ J_deplacer:
     sw t0, 4(sp)
     sw t1, 0(sp)
     
-    # Lire RCR
+    # Lire RCR et RDR
     la t0, RCR
     lw t0, 0(t0)
     lw t1, 0(t0)
     beqz t1, J_dep_fin
-    
-    # Lire RDR
+
     la t0, RDR
     lw t0, 0(t0)
     lw t1, 0(t0)
-    
-    # Touche 'i' - gauche
+
+    # Touche gauche 'i'
     li t0, 'i'
-    bne t1, t0, J_test_p
+    beq t1, t0, J_gauche
+    # Touche droite 'p'
+    li t0, 'p'
+    beq t1, t0, J_droite
+    # Touche tirer 'o'
+    li t0, 'o'
+    beq t1, t0, J_tirer
+    j J_dep_fin
+
+J_gauche:
     la t0, J_x
     lw t1, 0(t0)
     addi t1, t1, -1
     bltz t1, J_dep_fin
     sw t1, 0(t0)
     j J_dep_fin
-    
-J_test_p:
-    # Touche 'p' - droite
-    li t0, 'p'
-    bne t1, t0, J_test_o
+
+J_droite:
     la t0, J_x
     lw t1, 0(t0)
     addi t1, t1, 1
     la t2, J_largeur
     lw t2, 0(t2)
-    add t3, t1, t2
-    la t2, I_largeur
-    lw t2, 0(t2)
-    bge t3, t2, J_dep_fin
+    la t3, I_largeur
+    lw t3, 0(t3)
+    blt t1+t2, t3, J_dep_droite_ok
+    j J_dep_fin
+J_dep_droite_ok:
     sw t1, 0(t0)
     j J_dep_fin
-    
-J_test_o:
-    # Touche 'o' - tirer
-    li t0, 'o'
-    bne t1, t0, J_dep_fin
+
+J_tirer:
     jal M_tirer_joueur
-    
+
 J_dep_fin:
     lw t1, 0(sp)
     lw t0, 4(sp)
@@ -808,55 +423,9 @@ J_dep_fin:
     addi sp, sp, 12
     ret
 
-M_tirer_joueur:
-    addi sp, sp, -12
-    sw t0, 8(sp)
-    sw t1, 4(sp)
-    sw t2, 0(sp)
-    
-    # Trouver un missile libre
-    la t0, M_max
-    lw t0, 0(t0)
-    la t1, M_tableau
-    lw t1, 0(t1)
-    
-    li t2, 0
-M_tir_j_loop:
-    bge t2, t0, M_tir_j_fin
-    slli a0, t2, 4
-    add a0, t1, a0
-    lw a1, 12(a0)
-    bnez a1, M_tir_j_next
-    
-   # Missile trouvé
-    la a1, J_x
-    lw a1, 0(a1)
-    la a2, J_largeur
-    lw a2, 0(a2)
-    srli a2, a2, 1
-    add a1, a1, a2
-    sw a1, 0(a0)        # x = centre du joueur
-    
-    la a1, J_y
-    lw a1, 0(a1)
-    sw a1, 4(a0)        # y
-    
-    li a1, 1
-    sw a1, 8(a0)        # direction = 1 (haut)
-    sw a1, 12(a0)       # actif = 1
-    
-    j M_tir_j_fin
-    
-M_tir_j_next:
-    addi t2, t2, 1
-    j M_tir_j_loop
-    
-M_tir_j_fin:
-    lw t2, 0(sp)
-    lw t1, 4(sp)
-    lw t0, 8(sp)
-    addi sp, sp, 12
-    ret
+# ----------------------------------------
+# Déplacement et tir des missiles
+# ----------------------------------------
 
 M_deplacer:
     addi sp, sp, -16
@@ -873,45 +442,84 @@ M_deplacer:
     lw s2, 0(s2)
     
     li t0, 0
-M_dep_loop:
-    bge t0, s0, M_dep_fin
-    
+M_loop:
+    bge t0, s0, M_fin
     slli t1, t0, 4
     add t1, s1, t1
-    
-    lw t2, 12(t1)       # actif ?
-    beqz t2, M_dep_next
-    
-    # Déplacer selon la direction
+    lw t2, 12(t1)
+    beqz t2, M_next
+
     lw t3, 8(t1)        # direction
-    lw t4, 4(t1)        # y actuel
-    
-    mul t3, t3, s2
-    sub t4, t4, t3      # y -= direction * vitesse
-    
-    # Vérifier les limites
-    bltz t4, M_dep_desactiver
+    lw t4, 4(t1)        # y
+    sub t4, t4, t3*s2
+    bltz t4, M_desact
     la t5, I_hauteur
     lw t5, 0(t5)
-    bge t4, t5, M_dep_desactiver
-    
-    sw t4, 4(t1)        # Nouvelle position
-    j M_dep_next
-    
-M_dep_desactiver:
-    sw zero, 12(t1)     # Désactiver
-    
-M_dep_next:
+    bge t4, t5, M_desact
+    sw t4, 4(t1)
+    j M_next
+M_desact:
+    sw zero, 12(t1)
+M_next:
     addi t0, t0, 1
-    j M_dep_loop
-    
-M_dep_fin:
+    j M_loop
+M_fin:
     lw s2, 0(sp)
     lw s1, 4(sp)
     lw s0, 8(sp)
     lw ra, 12(sp)
     addi sp, sp, 16
     ret
+
+M_tirer_joueur:
+    addi sp, sp, -12
+    sw t0, 8(sp)
+    sw t1, 4(sp)
+    sw t2, 0(sp)
+
+    la t0, M_max
+    lw t0, 0(t0)
+    la t1, M_tableau
+    lw t1, 0(t1)
+    
+    li t2, 0
+M_tir_loop:
+    bge t2, t0, M_tir_fin
+    slli a0, t2, 4
+    add a0, t1, a0
+    lw a1, 12(a0)
+    bnez a1, M_next_missile
+
+    # Initialiser missile
+    la a1, J_x
+    lw a1, 0(a1)
+    la a2, J_largeur
+    lw a2, 0(a2)
+    srli a2, a2, 1
+    add a1, a1, a2
+    sw a1, 0(a0)
+
+    la a1, J_y
+    lw a1, 0(a1)
+    sw a1, 4(a0)
+    li a1, 1
+    sw a1, 8(a0)
+    sw a1, 12(a0)
+    j M_tir_fin
+
+M_next_missile:
+    addi t2, t2, 1
+    j M_tir_loop
+M_tir_fin:
+    lw t2, 0(sp)
+    lw t1, 4(sp)
+    lw t0, 8(sp)
+    addi sp, sp, 12
+    ret
+
+# ----------------------------------------
+# Déplacement des envahisseurs
+# ----------------------------------------
 
 E_deplacer:
     addi sp, sp, -20
@@ -920,130 +528,87 @@ E_deplacer:
     sw s1, 8(sp)
     sw s2, 4(sp)
     sw s3, 0(sp)
-    
-    # Vérifier si on doit tirer
+
+    # Tir automatique
     la t0, E_tir_compteur
     lw t1, 0(t0)
     addi t1, t1, 1
     la t2, E_tir_frequence
     lw t2, 0(t2)
-    blt t1, t2, E_dep_pas_tir
-    
+    blt t1, t2, E_no_tir
     li t1, 0
     jal M_tirer_envahisseur
-    
-E_dep_pas_tir:
+E_no_tir:
     la t0, E_tir_compteur
     sw t1, 0(t0)
-    
-    # Déplacer les envahisseurs
+
+    # Déplacement envahisseurs
     la s0, E_nombre
     lw s0, 0(s0)
     la s1, E_tableau
     lw s1, 0(s1)
     la s2, E_direction
     lw s2, 0(s2)
-    
-    # Vérifier si on touche un bord
-    li t6, 0            # Flag collision
+    li t6, 0
     li t0, 0
-E_dep_check:
-    bge t0, s0, E_dep_check_fin
-    
+
+E_check_loop:
+    bge t0, s0, E_check_fin
     li t1, 12
     mul t1, t0, t1
     add t1, s1, t1
-    
-    lw t2, 8(t1)        # vivant ?
-    beqz t2, E_dep_check_next
-    
-    lw t3, 0(t1)        # x
-    la t4, E_largeur
-    lw t4, 0(t4)
-    add t3, t3, t4
-    
-    # Si direction = 1 (droite), vérifier bord droit
-    li t4, 1
-    bne s2, t4, E_dep_check_gauche
-    
+    lw t2, 8(t1)
+    beqz t2, E_next_check
+    lw t3, 0(t1)
+    add t3, t3, s2
     la t4, I_largeur
     lw t4, 0(t4)
-    add t5, t3, s2
-    bge t5, t4, E_dep_collision
-    j E_dep_check_next
-    
-E_dep_check_gauche:
-    # Si direction = -1 (gauche), vérifier bord gauche
-    lw t3, 0(t1)
-    add t5, t3, s2
-    bltz t5, E_dep_collision
-    j E_dep_check_next
-    
-E_dep_collision:
+    blt t3, t4, E_next_check
     li t6, 1
-    
-E_dep_check_next:
+E_next_check:
     addi t0, t0, 1
-    j E_dep_check
-    
-E_dep_check_fin:
-    # Si collision, descendre et changer de direction
-    beqz t6, E_dep_move
-    
-    # Descendre
+    j E_check_loop
+E_check_fin:
+    beqz t6, E_move
+
+    # Descendre et inverser direction
     la t0, E_descente
     lw t0, 0(t0)
     li t1, 0
-E_dep_descendre:
-    bge t1, s0, E_dep_desc_fin
+E_desc_loop:
+    bge t1, s0, E_desc_fin
     li t2, 12
     mul t2, t1, t2
     add t2, s1, t2
-    
     lw t3, 8(t2)
-    beqz t3, E_dep_desc_next
-    
+    beqz t3, E_desc_next
     lw t3, 4(t2)
     add t3, t3, t0
     sw t3, 4(t2)
-    
-    # Vérifier si atteint le sol
-    la t4, O_y
-    lw t4, 0(t4)
-    bge t3, t4, E_dep_game_over
-    
-E_dep_desc_next:
+E_desc_next:
     addi t1, t1, 1
-    j E_dep_descendre
-    
-E_dep_desc_fin:
-    # Changer de direction
+    j E_desc_loop
+E_desc_fin:
     neg s2, s2
     la t0, E_direction
     sw s2, 0(t0)
-    
-E_dep_move:
-    # Déplacer tous les envahisseurs
+
+E_move:
     li t0, 0
-E_dep_move_loop:
-    bge t0, s0, E_dep_move_fin
-    
+E_move_loop:
+    bge t0, s0, E_move_fin
     li t1, 12
     mul t1, t0, t1
     add t1, s1, t1
-    
     lw t2, 8(t1)
-    beqz t2, E_dep_move_next
-    
+    beqz t2, E_next_move
     lw t3, 0(t1)
     add t3, t3, s2
     sw t3, 0(t1)
-    
-E_dep_move_next:
+E_next_move:
     addi t0, t0, 1
-    j E_dep_move_loop
-    
-E_dep_move_fin:
+    j E_move_loop
+E_move_fin:
     lw s3, 0(sp)
     lw s2, 4(sp)
     lw s1, 8(sp)
@@ -1051,13 +616,10 @@ E_dep_move_fin:
     lw ra, 16(sp)
     addi sp, sp, 20
     ret
-    
-E_dep_game_over:
-    la t0, JEU_en_cours
-    sw zero, 0(t0)
-    la t0, JEU_victoire
-    sw zero, 0(t0)
-    j E_dep_move_fin
+
+# ----------------------------------------
+# Tir des envahisseurs
+# ----------------------------------------
 
 M_tirer_envahisseur:
     addi sp, sp, -16
@@ -1065,67 +627,54 @@ M_tirer_envahisseur:
     sw t0, 8(sp)
     sw t1, 4(sp)
     sw t2, 0(sp)
-    
-    # Choisir un envahisseur vivant aléatoirement
-    # Utiliser le temps comme générateur simple
+
     li a7, 30
     ecall
-    
+
     la t0, E_nombre
     lw t0, 0(t0)
-    remu t1, a0, t0     # Index aléatoire
-    
-    # Vérifier si vivant
+    remu t1, a0, t0
+
     la t2, E_tableau
     lw t2, 0(t2)
     li t0, 12
     mul t0, t1, t0
     add t0, t2, t0
-    
     lw t1, 8(t0)
-    beqz t1, M_tir_e_fin
-    
-    # Trouver un missile libre
+    beqz t1, M_env_fin
+
     la t1, M_max
     lw t1, 0(t1)
     la t2, M_tableau
     lw t2, 0(t2)
-    
     li a1, 0
-M_tir_e_loop:
-    bge a1, t1, M_tir_e_fin
+M_env_loop:
+    bge a1, t1, M_env_fin
     slli a2, a1, 4
     add a2, t2, a2
     lw a3, 12(a2)
-    bnez a3, M_tir_e_next
-    
-    # Missile trouvé
-    lw a3, 0(t0)        # x envahisseur
+    bnez a3, M_env_next
+    # Missile libre trouvé
+    lw a3, 0(t0)
     la a4, E_largeur
     lw a4, 0(a4)
     srli a4, a4, 1
     add a3, a3, a4
-    sw a3, 0(a2)        # x
-    
-    lw a3, 4(t0)        # y envahisseur
+    sw a3, 0(a2)
+    lw a3, 4(t0)
     la a4, E_hauteur
     lw a4, 0(a4)
     add a3, a3, a4
-    sw a3, 4(a2)        # y
-    
+    sw a3, 4(a2)
     li a3, -1
-    sw a3, 8(a2)        # direction = -1 (bas)
-    
+    sw a3, 8(a2)
     li a3, 1
-    sw a3, 12(a2)       # actif = 1
-    
-    j M_tir_e_fin
-    
-M_tir_e_next:
+    sw a3, 12(a2)
+    j M_env_fin
+M_env_next:
     addi a1, a1, 1
-    j M_tir_e_loop
-    
-M_tir_e_fin:
+    j M_env_loop
+M_env_fin:
     lw t2, 0(sp)
     lw t1, 4(sp)
     lw t0, 8(sp)
@@ -1134,41 +683,36 @@ M_tir_e_fin:
     ret
 
 # ========================================
-# PARTIE 6-7 : Collisions
+# PARTIE 6-7 : Collisions simplifié
 # ========================================
 
 verifier_collisions:
     addi sp, sp, -8
     sw ra, 4(sp)
     sw s0, 0(sp)
-    
-    # Vérifier missiles contre envahisseurs
+
     jal collision_missile_envahisseurs
-    
-    # Vérifier missiles contre joueur
     jal collision_missile_joueur
-    
-    # Vérifier missiles contre obstacles
     jal collision_missile_obstacles
-    
-    # Vérifier fin du jeu
     jal verifier_fin_jeu
-    
+
     lw s0, 0(sp)
     lw ra, 4(sp)
     addi sp, sp, 8
     ret
 
+# ----------------------------------------
+# Missiles contre envahisseurs
+# ----------------------------------------
+
 collision_missile_envahisseurs:
-    addi sp, sp, -28
-    sw ra, 24(sp)
-    sw s0, 20(sp)
-    sw s1, 16(sp)
-    sw s2, 12(sp)
-    sw s3, 8(sp)
-    sw s4, 4(sp)
-    sw s5, 0(sp)
-    
+    addi sp, sp, -24
+    sw ra, 20(sp)
+    sw s0, 16(sp)
+    sw s1, 12(sp)
+    sw s2, 8(sp)
+    sw s3, 4(sp)
+
     la s0, M_max
     lw s0, 0(s0)
     la s1, M_tableau
@@ -1177,206 +721,42 @@ collision_missile_envahisseurs:
     lw s2, 0(s2)
     la s3, E_tableau
     lw s3, 0(s3)
-    
-    li s4, 0            # Index missile
-CME_loop_m:
-    bge s4, s0, CME_fin
-    
-    slli t0, s4, 4
-    add t0, s1, t0
-    
-    lw t1, 12(t0)       # actif ?
-    beqz t1, CME_next_m
-    
-    lw t1, 8(t0)        # direction
-    li t2, 1
-    bne t1, t2, CME_next_m  # Seulement missiles du joueur
-    
-    # Tester contre tous les envahisseurs
-    li s5, 0
-CME_loop_e:
-    bge s5, s2, CME_next_m
-    
-    li t1, 12
-    mul t1, s5, t1
-    add t1, s3, t1
-    
-    lw t2, 8(t1)        # vivant ?
-    beqz t2, CME_next_e
-    
-    # Vérifier intersection
-    mv a0, t0           # Adresse missile
-    mv a1, t1           # Adresse envahisseur
-    
-    addi sp, sp, -8
-    sw t0, 4(sp)
-    sw t1, 0(sp)
-    jal M_intersecteRectangle
-    lw t1, 0(sp)
-    lw t0, 4(sp)
-    addi sp, sp, 8
-    
-    beqz a0, CME_next_e
-    
-    # Collision détectée
-    sw zero, 8(t1)      # Envahisseur mort
-    sw zero, 12(t0)     # Missile désactivé
-    j CME_next_m
-    
-CME_next_e:
-    addi s5, s5, 1
-    j CME_loop_e
-    
-CME_next_m:
-    addi s4, s4, 1
-    j CME_loop_m
-    
-CME_fin:
-    lw s5, 0(sp)
-    lw s4, 4(sp)
-    lw s3, 8(sp)
-    lw s2, 12(sp)
-    lw s1, 16(sp)
-    lw s0, 20(sp)
-    lw ra, 24(sp)
-    addi sp, sp, 28
-    ret
 
-collision_missile_joueur:
-    addi sp, sp, -16
-    sw ra, 12(sp)
-    sw s0, 8(sp)
-    sw s1, 4(sp)
-    sw s2, 0(sp)
-    
-    la s0, M_max
-    lw s0, 0(s0)
-    la s1, M_tableau
-    lw s1, 0(s1)
-    
-    li s2, 0
-CMJ_loop:
-    bge s2, s0, CMJ_fin
-    
-    slli t0, s2, 4
+    li t4, 0
+CME_missile_loop:
+    bge t4, s0, CME_fin
+    slli t0, t4, 4
     add t0, s1, t0
-    
     lw t1, 12(t0)
-    beqz t1, CMJ_next
-    
+    beqz t1, CME_next
     lw t1, 8(t0)
-    li t2, -1
-    bne t1, t2, CMJ_next    # Seulement missiles ennemis
-    
-    # Créer rectangle joueur temporaire
-    la t1, J_x
-    lw t1, 0(t1)
-    la t2, J_y
-    lw t2, 0(t2)
-    la t3, J_largeur
-    lw t3, 0(t3)
-    la t4, J_hauteur
-    lw t4, 0(t4)
-    
-    addi sp, sp, -20
-    sw t1, 0(sp)
-    sw t2, 4(sp)
-    sw t3, 8(sp)
-    sw t4, 12(sp)
-    sw t0, 16(sp)
-    
-    mv a0, t0
-    mv a1, sp
-    jal M_intersecteRectangle
-    
-    lw t0, 16(sp)
-    addi sp, sp, 20
-    
-    beqz a0, CMJ_next
-    
-    # Collision - perdre une vie
-    sw zero, 12(t0)
-    la t1, J_vies
-    lw t2, 0(t1)
-    addi t2, t2, -1
-    sw t2, 0(t1)
-    
-CMJ_next:
-    addi s2, s2, 1
-    j CMJ_loop
-    
-CMJ_fin:
-    lw s2, 0(sp)
-    lw s1, 4(sp)
-    lw s0, 8(sp)
-    lw ra, 12(sp)
-    addi sp, sp, 16
-    ret
+    li t2, 1
+    bne t1, t2, CME_next
 
-collision_missile_obstacles:
-    addi sp, sp, -24
-    sw ra, 20(sp)
-    sw s0, 16(sp)
-    sw s1, 12(sp)
-    sw s2, 8(sp)
-    sw s3, 4(sp)
-    sw s4, 0(sp)
-    
-    la s0, M_max
-    lw s0, 0(s0)
-    la s1, M_tableau
-    lw s1, 0(s1)
-    la s2, O_nombre
-    lw s2, 0(s2)
-    la s3, O_tableau
-    lw s3, 0(s3)
-    
-    li s4, 0
-CMO_loop_m:
-    bge s4, s0, CMO_fin
-    
-    slli t0, s4, 4
-    add t0, s1, t0
-    
-    lw t1, 12(t0)
-    beqz t1, CMO_next_m
-    
-    # Tester contre obstacles
     li t5, 0
-CMO_loop_o:
-    bge t5, s2, CMO_next_m
-    
-    slli t1, t5, 3
+CME_env_loop:
+    bge t5, s2, CME_next
+    li t1, 12
+    mul t1, t5, t1
     add t1, s3, t1
-    
-    addi sp, sp, -8
-    sw t0, 4(sp)
-    sw t1, 0(sp)
-    
+    lw t2, 8(t1)
+    beqz t2, CME_next_env
+
     mv a0, t0
     mv a1, t1
     jal M_intersecteRectangle
-    
-    lw t1, 0(sp)
-    lw t0, 4(sp)
-    addi sp, sp, 8
-    
-    beqz a0, CMO_next_o
-    
-    # Collision
-    sw zero, 12(t0)
-    j CMO_next_m
-    
-CMO_next_o:
+    beqz a0, CME_next_env
+
+    sw zero, 8(t1)      # Envahisseur mort
+    sw zero, 12(t0)     # Missile désactivé
+    j CME_next
+CME_next_env:
     addi t5, t5, 1
-    j CMO_loop_o
-    
-CMO_next_m:
-    addi s4, s4, 1
-    j CMO_loop_m
-    
-CMO_fin:
-    lw s4, 0(sp)
+    j CME_env_loop
+CME_next:
+    addi t4, t4, 1
+    j CME_missile_loop
+CME_fin:
     lw s3, 4(sp)
     lw s2, 8(sp)
     lw s1, 12(sp)
@@ -1385,63 +765,160 @@ CMO_fin:
     addi sp, sp, 24
     ret
 
+# ----------------------------------------
+# Missiles contre joueur
+# ----------------------------------------
+
+collision_missile_joueur:
+    addi sp, sp, -12
+    sw ra, 8(sp)
+    sw s0, 4(sp)
+    sw s1, 0(sp)
+
+    la s0, M_max
+    lw s0, 0(s0)
+    la s1, M_tableau
+    lw s1, 0(s1)
+
+    li t0, 0
+CMJ_loop:
+    bge t0, s0, CMJ_fin
+    slli t1, t0, 4
+    add t1, s1, t1
+    lw t2, 12(t1)
+    beqz t2, CMJ_next
+    lw t2, 8(t1)
+    li t3, -1
+    bne t2, t3, CMJ_next
+
+    # Adresse temporaire joueur
+    la a1, J_x
+    la a2, J_y
+    la a3, J_largeur
+    la a4, J_hauteur
+
+    addi sp, sp, -16
+    sw t1, 0(sp)
+    mv a0, t1
+    mv a1, a1
+    jal M_intersecteRectangle
+    lw t1, 0(sp)
+    addi sp, sp, 16
+    beqz a0, CMJ_next
+
+    sw zero, 12(t1)        # Missile désactivé
+    la t2, J_vies
+    lw t3, 0(t2)
+    addi t3, t3, -1
+    sw t3, 0(t2)
+
+CMJ_next:
+    addi t0, t0, 1
+    j CMJ_loop
+CMJ_fin:
+    lw s1, 0(sp)
+    lw s0, 4(sp)
+    lw ra, 8(sp)
+    addi sp, sp, 12
+    ret
+
+# ----------------------------------------
+# Missiles contre obstacles
+# ----------------------------------------
+
+collision_missile_obstacles:
+    addi sp, sp, -16
+    sw ra, 12(sp)
+    sw s0, 8(sp)
+    sw s1, 4(sp)
+    sw s2, 0(sp)
+
+    la s0, M_max
+    lw s0, 0(s0)
+    la s1, M_tableau
+    lw s1, 0(s1)
+    la s2, O_nombre
+    lw s2, 0(s2)
+    la s3, O_tableau
+    lw s3, 0(s3)
+
+    li t0, 0
+CMO_m_loop:
+    bge t0, s0, CMO_fin
+    slli t1, t0, 4
+    add t1, s1, t1
+    lw t2, 12(t1)
+    beqz t2, CMO_next
+
+    li t3, 0
+CMO_o_loop:
+    bge t3, s2, CMO_next
+    slli t4, t3, 3
+    add t4, s3, t4
+    mv a0, t1
+    mv a1, t4
+    jal M_intersecteRectangle
+    beqz a0, CMO_next_o
+    sw zero, 12(t1)
+    j CMO_next
+CMO_next_o:
+    addi t3, t3, 1
+    j CMO_o_loop
+
+CMO_next:
+    addi t0, t0, 1
+    j CMO_m_loop
+CMO_fin:
+    lw s2, 0(sp)
+    lw s1, 4(sp)
+    lw s0, 8(sp)
+    lw ra, 12(sp)
+    addi sp, sp, 16
+    ret
+
+# ----------------------------------------
+# Intersection rectangle simple
+# ----------------------------------------
+
 M_intersecteRectangle:
     addi sp, sp, -16
     sw s0, 12(sp)
     sw s1, 8(sp)
     sw s2, 4(sp)
     sw s3, 0(sp)
-    
-    # a0 = adresse missile [x, y, dir, actif]
-    # a1 = adresse rectangle [x, y, largeur, hauteur] ou [x, y] pour obstacles
-    
-    lw s0, 0(a0)        # mx
-    lw s1, 4(a0)        # my
-    
-    lw s2, 0(a1)        # rx
-    lw s3, 4(a1)        # ry
-    
-    # Déterminer largeur/hauteur du rectangle
-    lw t0, 4(a1)
-    la t1, O_tableau
-    lw t1, 0(t1)
-    blt a1, t1, MIR_envahisseur
-    
-    # C'est un obstacle
+
+    lw s0, 0(a0)      # mx
+    lw s1, 4(a0)      # my
+    lw s2, 0(a1)      # rx
+    lw s3, 4(a1)      # ry
+
+    # Largeur/hauteur
+    la t0, O_tableau
+    lw t0, 0(t0)
+    blt a1, t0, MIR_env
     la t2, O_largeur
     lw t2, 0(t2)
     la t3, O_hauteur
     lw t3, 0(t3)
     j MIR_test
-    
-MIR_envahisseur:
+MIR_env:
     la t2, E_largeur
     lw t2, 0(t2)
     la t3, E_hauteur
     lw t3, 0(t3)
-    
+
 MIR_test:
-    # Vérifier si mx est dans [rx, rx+largeur]
     blt s0, s2, MIR_non
     add t4, s2, t2
     bge s0, t4, MIR_non
-    
-    # Vérifier si my est dans [ry, ry+hauteur]
-    la t4, M_longueur
-    lw t4, 0(t4)
-    add t5, s1, t4      # my + longueur
-    
+    add t5, s1, M_longueur
     blt t5, s3, MIR_non
     add t6, s3, t3
     bge s1, t6, MIR_non
-    
-    # Intersection détectée
     li a0, 1
     j MIR_fin
-    
 MIR_non:
     li a0, 0
-    
 MIR_fin:
     lw s3, 0(sp)
     lw s2, 4(sp)
@@ -1450,41 +927,40 @@ MIR_fin:
     addi sp, sp, 16
     ret
 
+# ----------------------------------------
+# Vérifier fin de jeu
+# ----------------------------------------
+
 verifier_fin_jeu:
     addi sp, sp, -8
     sw t0, 4(sp)
     sw t1, 0(sp)
-    
-    # Vérifier si le joueur a perdu toutes ses vies
+
     la t0, J_vies
     lw t0, 0(t0)
     blez t0, fin_defaite
-    
-    # Vérifier si tous les envahisseurs sont morts
+
     la t0, E_nombre
     lw t0, 0(t0)
     la t1, E_tableau
     lw t1, 0(t1)
-    
-    li t2, 0            # Compteur vivants
-    li t3, 0            # Index
+
+    li t2, 0
+    li t3, 0
 VFJ_loop:
     bge t3, t0, VFJ_check
-    
     li t4, 12
     mul t4, t3, t4
     add t4, t1, t4
     lw t5, 8(t4)
-    
     add t2, t2, t5
-    
     addi t3, t3, 1
     j VFJ_loop
-    
+
 VFJ_check:
     beqz t2, fin_victoire
     j VFJ_fin
-    
+
 fin_victoire:
     la t0, JEU_en_cours
     sw zero, 0(t0)
@@ -1492,13 +968,13 @@ fin_victoire:
     li t1, 1
     sw t1, 0(t0)
     j VFJ_fin
-    
+
 fin_defaite:
     la t0, JEU_en_cours
     sw zero, 0(t0)
     la t0, JEU_victoire
     sw zero, 0(t0)
-    
+
 VFJ_fin:
     lw t1, 0(sp)
     lw t0, 4(sp)
