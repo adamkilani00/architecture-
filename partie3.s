@@ -168,6 +168,7 @@ I_plot:
     ret
 
 # Fonction : I_effacer
+# Cette fonction remplit tout l’écran en noir, pixel par pixel.
 I_effacer:
     addi sp, sp, -20
     sw ra, 16(sp)
@@ -219,6 +220,7 @@ effacer_fin:
     ret
 
 # Fonction : I_rectangle
+# Dessine un rect de couleur en utilisant I_plot 
 I_rectangle:
     addi sp, sp, -32
     sw ra, 28(sp)
@@ -237,7 +239,7 @@ I_rectangle:
     mv s3, a3              # s3 = hauteur
     mv s4, a4              # s4 = couleur
 
-    # Calculer x_fin et y_fin
+    # Calculer x_fin et y_fin pour savoir ou va finir la boucle 
     add s5, s0, s2         # s5 = x_fin
     add s6, s1, s3         # s6 = y_fin
 
@@ -277,9 +279,10 @@ rect_fin:
     ret
 
 # Fonction : I_buff_to_visu
-I_buff_to_visu:
- # t0 = I_buff (ton brouillon)
- # t1 = I_visu (l'écran visible)
+#La fonct copie l’image temporaire I_buff (le "brouillon", la mémoire intermédiaire où on dessine) vers I_visu (la mémoire réellement affichée à l’écran).
+I_buff_to_v :
+ # t0 = I_buff 
+ # t1 = I_visu 
  # t2 = taille totale à copier (32×32×4 = 4096 octets)
     addi sp, sp, -16
     sw t0, 12(sp)
@@ -298,7 +301,7 @@ I_buff_to_visu:
     lw t2, 0(t2)
     la t3, I_hauteur
     lw t3, 0(t3)
-    mul t2, t2, t3         # t2 = nombre de Units
+    mul t2, t2, t3         # # largeur × hauteur, nb de uunit 
     slli t2, t2, 2         # t2 = nombre d'octets
     
     # Boucle qui copie 4 octets par 4 octets
@@ -308,10 +311,10 @@ copie_boucle:
 # Lit 4 octets depuis I_buff
 # Écrit 4 octets dans I_visu  
 # Répète jusqu'à avoir tout copié
-    bge t3, t2, copie_fin
+    bge t3, t2, copie_fin # Si t3 >= t2 suate copie fin 
 
     # Copier un mot (4 octets)
-    add a0, t0, t3         # adresse source
+    add a0, t0, t3         # a0 pointe sur le premier pixel de I_buff, car t3 = 0 
     lw a2, 0(a0)           # lire depuis I_buff
     add a0, t1, t3         # adresse destination
     sw a2, 0(a0)           # écrire dans I_visu
