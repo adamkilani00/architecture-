@@ -301,7 +301,7 @@ I_buff_to_v :
     lw t2, 0(t2)
     la t3, I_hauteur
     lw t3, 0(t3)
-    mul t2, t2, t3         # # largeur × hauteur, nb de uunit 
+    mul t2, t2, t3         # largeur × hauteur, nb de uunit 
     slli t2, t2, 2         # t2 = nombre d'octets
     
     # Boucle qui copie 4 octets par 4 octets
@@ -315,7 +315,7 @@ copie_boucle:
 
     # Copier un mot (4 octets)
     add a0, t0, t3         # a0 pointe sur le premier pixel de I_buff, car t3 = 0 
-    lw a2, 0(a0)           # lire depuis I_buff
+    lw a2, 0(a0)           # lire depuis I_buff 
     add a0, t1, t3         # adresse destination
     sw a2, 0(a0)           # écrire dans I_visu
 
@@ -366,7 +366,7 @@ anim_boucle:
     mv a4, s4
     jal I_rectangle
 
-    # Copier I_buff vers I_visu
+    # Copier I_buff vers I_visu,le rect devient visible à l’écran.
     jal I_buff_to_visu
 
     # Pause de 50ms
