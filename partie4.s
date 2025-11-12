@@ -214,8 +214,8 @@ I_xy_to_addr:
     la t0, I_largeur
     lw t0, 0(t0)
     mul t1, a1, t0
-    add t1, t1, a0
-    slli t1, t1, 2
+    add t1, t1, a0 # index= y ∗ largeur + x
+    slli t1, t1, 2 # t1 = t1 * 4 
     
     la t2, I_buff
     lw t2, 0(t2)
@@ -238,8 +238,8 @@ I_plot:
     # Vérifier les limites
     la t0, I_largeur
     lw t0, 0(t0)
-    bge a0, t0, I_plot_fin
-    bltz a0, I_plot_fin
+    bge a0, t0, I_plot_fin # Si a0 >= t0
+    bltz a0, I_plot_fin # si a0 < 0 
     
     la t0, I_hauteur
     lw t0, 0(t0)
@@ -247,8 +247,8 @@ I_plot:
     bltz a1, I_plot_fin
     
     mv t0, a2
-    jal I_xy_to_addr
-    sw t0, 0(a0)
+    jal I_xy_to_addr # Va a l'adresse memoire  
+    sw t0, 0(a0) # Colorie le pixel (met la couleur dans l'adresse du pixel a colorier)
     
 I_plot_fin:
     lw t0, 0(sp)
@@ -314,8 +314,8 @@ I_rectangle:
     mv s2, a2
     mv s3, a3
     mv s4, a4
-    add s5, s0, s2
-    add s6, s1, s3
+    add s5, s0, s2 # x_max 
+    add s6, s1, s3 # y_max
     
     mv t0, s1
 I_rect_y:
@@ -352,9 +352,10 @@ I_buff_to_visu:
     sw t3, 0(sp)
     
     la t0, I_buff
-    lw t0, 0(t0)
+    lw t0, 0(t0) # adresse I_buff
     la t1, I_visu
-    lw t1, 0(t1)
+    lw t1, 0(t1) #adresse I_visu
+    
     
     la t2, I_largeur
     lw t2, 0(t2)
