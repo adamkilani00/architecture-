@@ -478,7 +478,7 @@ O_creer:
     # Allouer tableau : nombre * 2 * 4 octets
     la t0, O_nombre
     lw t0, 0(t0)
-    slli t0, t0, 3
+    slli t0, t0, 3 # t0 = O_nombre * 8 octets (2 mots * 4 octets)
     
     mv a0, t0
     li a7, 9
