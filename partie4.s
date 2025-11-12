@@ -104,10 +104,10 @@ boucle_jeu:
     # Vérifier si le jeu est terminé
     la t0, JEU_en_cours
     lw t0, 0(t0)
-    beqz t0, fin_jeu
+    beqz t0, fin_jeu  # Si t0 == 0 le jeu se termine et on saute a fin_jeu 
     
-    # Effacer le buffer
-    jal I_effacer
+    # Effacer le buffer et met tt l'ecran en noir 
+    jal I_effacer 
     
     # Afficher tous les éléments
     jal O_afficher
